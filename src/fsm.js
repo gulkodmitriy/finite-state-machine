@@ -9,6 +9,9 @@ class FSM {
         }else{
             this._config = config;
             this._state = this._config.initial;
+            this._history = [];
+            this._history.push(this._state);
+
         }
     }
 
@@ -27,6 +30,7 @@ class FSM {
     changeState(state) {
         if(this._config.states[state]){
             this._state = state;
+            this._history.push(this._state);
         }else{
             throw new Error;
         }
@@ -40,6 +44,7 @@ class FSM {
     trigger(event) {
         if(this._config.states[this._state].transitions[event]){
             this._state = this._config.states[this._state].transitions[event];
+            this._history.push(this._state);
         }else{
             throw new Error;
         }
@@ -62,12 +67,20 @@ class FSM {
         if (event == undefined){
             return Object.keys(this._config.states)
         }
-        if(this._config.states.transitions[event]){
-
-        }else{
-            var A = [];
-            return A;
+        var S = [];
+        S = Object.keys(this._config.states);
+        var X = [];
+        for(var i=0;i<S.length;i++) {
+            var Y = [];
+            Y = Object.keys(this._config.states[S[i]].transitions);
+            for(var j=0; j<Y.length;j++) {
+                if (Y[j] == event) {
+                    X.push(S[i]);
+                }
+            }
         }
+        return X;
+
     }
 
     /**
@@ -75,7 +88,13 @@ class FSM {
      * Returns false if undo is not available.
      * @returns {Boolean}
      */
-    undo() {}
+    undo() {
+        if(this._state == this._config.initial){
+            return false;
+        }
+        this._history.push(this._history[this._history.length-2])
+        return this._history[this._history.length-3];
+    }
 
     /**
      * Goes redo to state.
