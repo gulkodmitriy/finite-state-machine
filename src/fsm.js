@@ -9,9 +9,7 @@ class FSM {
         }else{
             this._config = config;
             this._state = this._config.initial;
-            this._history = [];
-            this._history.push(this._state);
-
+            this._history = new Array(this._state);
         }
     }
 
@@ -55,6 +53,7 @@ class FSM {
      */
     reset() {
         this._state = this._config.initial;
+        this._history.push(this._state);
     }
 
     /**
@@ -91,9 +90,11 @@ class FSM {
     undo() {
         if(this._state == this._config.initial){
             return false;
+        }else{
+            this._state = this._history[this._history.length - 2];
+            this._history.push(this._state);
+            return true;
         }
-        this._history.push(this._history[this._history.length-2])
-        return this._history[this._history.length-3];
     }
 
     /**
@@ -101,12 +102,19 @@ class FSM {
      * Returns false if redo is not available.
      * @returns {Boolean}
      */
-    redo() {}
+    redo() {
+        if(this._state == this._config.initial){
+            return false;
+        }
+    }
 
     /**
      * Clears transition history
      */
-    clearHistory() {}
+    clearHistory() {
+        this._history.splice(0,this._history.length-1);
+        this._state = this._config.initial;
+    }
 }
 
 module.exports = FSM;
